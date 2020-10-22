@@ -39,6 +39,8 @@
 #endif
 
 #define BS_MAX_ERROR_SIZE 256
+#define BS_ERROR -1
+#define BS_SUCCESS 0
 
 class BSSocket
 {
@@ -56,11 +58,16 @@ private:
 public:
     BSSocket();
     ~BSSocket();
-    int create();
+    int createsock();
+    int bindsock();
+    int listensock();
+    int acceptsock();
+    int readsock(const int clientConnection);
     int create(const int domain, const int type, const int protocol);
     int setOptions(int level, int optname, const void *optval, int optlen);
 
     int getAddrInfo(const char *portNumber, const int family, const int flags);
+    void getAddrInfo();
 
     char *getErrorMessage();
     int getErrorCode();

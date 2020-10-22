@@ -3,6 +3,9 @@
 #define BS_BSSOCKET_INCLUDED 1
 #endif
 
+#include <string>
+#include <iostream>
+using namespace std;
 BSSocket::BSSocket()
 {
     sockfd = 0;
@@ -10,6 +13,9 @@ BSSocket::BSSocket()
     memset(&adresinfo, 0, sizeof(adresinfo));
 }
 
+//
+// Remove claimed resources
+//
 BSSocket::~BSSocket()
 {
     int retval = 0;
@@ -23,9 +29,76 @@ BSSocket::~BSSocket()
     }
 }
 
-int BSSocket::create()
+int BSSocket::createsock()
 {
     return create(adresinfo.ai_family, adresinfo.ai_socktype, adresinfo.ai_protocol);
+}
+
+int BSSocket::bindsock()
+{
+    int retval = 0;
+
+    retval = bind(sockfd, adresinfo.ai_addr, adresinfo.ai_addrlen);
+    if (BS_ERROR == retval)
+    {
+        errcode = errno;
+        char buffer[256];
+        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+    }
+
+    return retval;
+}
+
+int BSSocket::listensock()
+{
+    int retval = 0;
+
+    retval = listen(sockfd, backlog);
+    if (BS_ERROR == retval)
+    {
+        errcode = errno;
+        char buffer[256];
+        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+    }
+
+    return retval;
+}
+
+//
+// accept incoming connections
+//
+int BSSocket::acceptsock()
+{
+    int retval = 0;
+
+    // structure large enough to hold client's address
+    sockaddr_storage client_addr;
+    socklen_t client_addr_size = sizeof(client_addr);
+
+    retval = accept(sockfd, (sockaddr *)&client_addr, &client_addr_size);
+    if (BS_ERROR == retval)
+    {
+        errcode = errno;
+        char buffer[256];
+        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+    }
+
+    return retval;
+}
+
+int BSSocket::readsock(const int clientConnection)
+{
+    int valread = 0;
+    char buffer[1024] = {0};
+
+    valread = read(clientConnection, buffer, sizeof(buffer));
+    if (BS_ERROR == valread)
+    {
+        errcode = errno;
+        char buffer[256];
+        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+    }
+    return valread;
 }
 
 int BSSocket::create(const int domain, const int type, const int protocol)
@@ -87,6 +160,36 @@ int BSSocket::getAddrInfo(const char *portNumber, const int family, const int fl
         memcpy(&adresinfo, res, sizeof(*res));
     }
     return retval;
+}
+
+void BSSocket::getAddrInfo()
+{
+    std::string ipVer = "";
+    char ipStr[INET6_ADDRSTRLEN]; // ipv6 length makes sure both ipv4/6 addresses can be stored in this variable
+    void *addr;
+    if (adresinfo.ai_family == AF_INET)
+    {
+        ipVer = "IPv4";
+        sockaddr_in *ipv4 = reinterpret_cast<sockaddr_in *>(adresinfo.ai_addr);
+        addr = &(ipv4->sin_addr);
+
+        // convert IPv4 and IPv6 addresses from binary to text form
+        inet_ntop(adresinfo.ai_family, addr, ipStr, sizeof(ipStr));
+        std::cout << ipVer << " : " << ipStr
+                  << std::endl;
+    }
+
+    if (adresinfo.ai_family == AF_INET6)
+    {
+        ipVer = "IPv6";
+        sockaddr_in6 *ipv6 = reinterpret_cast<sockaddr_in6 *>(adresinfo.ai_addr);
+        addr = &(ipv6->sin6_addr);
+
+        // convert IPv4 and IPv6 addresses from binary to text form
+        inet_ntop(adresinfo.ai_family, addr, ipStr, sizeof(ipStr));
+        std::cout << ipVer << " : " << ipStr
+                  << std::endl;
+    }
 }
 
 int BSSocket::setOptions(int level, int optname, const void *optval, int optlen)

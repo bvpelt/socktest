@@ -1,20 +1,30 @@
 # Macros for the compiler
-CXX= g++
+CXX = g++
+
+# Debug flag
+DEBUGFLAG = -g
 
 # Compile flags
-CXXFLAGS= -O2 -g -march=x86-64
+CXXFLAGS = -O2 $(DEBUGFLAG) -march=x86-64
 
+# Objects
+objects = server.o bssocket.o
+
+.PHONY: ALL
 ALL: clean server
 
-server: server.o bssocket.o
-	$(CXX) -o server server.o bssocket.o    
+server: $(objects)
+	$(CXX) $(DEBUGFLAG) -o server $(objects) 
     
 bssocket.o: bssocket.cpp bssocket.h
-	$(CXX) -c $(CXXFLAGS) bssocket.cpp
+	$(CXX) -c $(CXXFLAGS) $<
     
 server.o: server.cpp bssocket.h
-	$(CXX) -c $(CXXFLAGS) server.cpp
+	$(CXX) -c $(CXXFLAGS) $<
 	
-clean:
-	rm -f *.o
-	    
+#
+# run clean without error checking
+#	
+.PHONY : clean
+clean :
+	-rm server *.o

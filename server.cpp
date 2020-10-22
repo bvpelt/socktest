@@ -7,23 +7,58 @@ int main(int argc, char *argv[], char *envp[])
 
     BSSocket bssocket;
 
-    int retval = 0;
+    int retval = BS_SUCCESS;
     char port[] = "1223";
 
     retval = bssocket.getAddrInfo(port, AF_INET, AI_PASSIVE); // AI_PASSIVE gives structure for server
 
-    if (0 == retval)
+    if (BS_SUCCESS == retval)
     {
-        retval = bssocket.create();
+        bssocket.getAddrInfo();
     }
 
-    if (0 == retval)
+    if (BS_SUCCESS == retval)
     {
-        retval = bssocket.create(1, 1, 7);
+        retval = bssocket.createsock();
 
-        if (retval <= 0)
+        if (retval == BS_ERROR)
         {
             cout << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+        }
+    }
+
+    if (retval > BS_SUCCESS)
+    {
+        retval = bssocket.bindsock();
+        if (retval == BS_ERROR)
+        {
+            cout << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+        }
+    }
+
+    if (retval == BS_SUCCESS)
+    {
+        retval = bssocket.listensock();
+        if (retval == BS_ERROR)
+        {
+            cout << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+        }
+    }
+
+    if (retval == BS_SUCCESS)
+    {
+        int clientConnection = bssocket.acceptsock();
+        if (clientConnection == BS_ERROR)
+        {
+            cout << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+        }
+        else
+        {
+            int bytesRead = bssocket.readsock(clientConnection);
+            if (retval == BS_ERROR)
+            {
+                cout << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+            }
         }
     }
 }
