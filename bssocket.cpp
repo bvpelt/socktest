@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 using namespace std;
+
 BSSocket::BSSocket()
 {
     sockfd = 0;
@@ -29,6 +30,21 @@ BSSocket::~BSSocket()
     }
 }
 
+//
+// server side routines (https://www.geeksforgeeks.org/socket-programming-cc/)
+//
+// - socket          createsock
+// - setsockopt
+// - bind            bindsock
+// - listen          listensock
+// - accept          acceptsock
+//
+// client side routines
+// - connect         connect(host, port)
+//
+// server and client
+// - send/recv       writesock/readsock
+//
 int BSSocket::createsock()
 {
     return create(adresinfo.ai_family, adresinfo.ai_socktype, adresinfo.ai_protocol);
@@ -86,6 +102,41 @@ int BSSocket::acceptsock()
     return retval;
 }
 
+//
+// client side
+//
+int BSSocket::connect(const char *host, const char *port)
+{
+    int retval = BS_SUCCESS;
+    retval = closeExistingSocket();
+
+    if (BS_SUCCESS == retval)
+    {
+        struct addrinfo *res;
+        memset(&adresinfo, 0, sizeof(adresinfo));
+
+        retval = getaddrinfo(host, port, &adresinfo, &res);
+        if (retval != BS_SUCCESS)
+        {
+            errcode = errno;
+            char buffer[256];
+            strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+        }
+        else
+        {
+            retval = create(res->ai_family, res->ai_socktype, res->ai_protocol);
+            if (retval != BS_ERROR)
+            {
+                sockfd = retval;
+            }
+        }
+    }
+    return retval;
+}
+
+//
+// server and client side
+//
 int BSSocket::readsock(const int clientConnection)
 {
     int valread = 0;
@@ -101,9 +152,26 @@ int BSSocket::readsock(const int clientConnection)
     return valread;
 }
 
-int BSSocket::create(const int domain, const int type, const int protocol)
+int BSSocket::writesock(const void *buffer, const int len, const int flags)
 {
-    int retval = 0;
+    int valwritten = BS_SUCCESS;
+
+    valwritten = send(sockfd, buffer, len, flags);
+    if (BS_ERROR == valwritten)
+    {
+        errcode = errno;
+        char buffer[256];
+        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+    }
+    return valwritten;
+}
+
+//
+//
+//
+int BSSocket::closeExistingSocket()
+{
+    int retval = BS_SUCCESS;
 
     if (sockfd > 0)
     { // socket already in use, might not occur so first close existing socket
@@ -119,12 +187,20 @@ int BSSocket::create(const int domain, const int type, const int protocol)
             strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
         }
     }
+    return retval;
+}
 
-    if (retval == 0)
+int BSSocket::create(const int domain, const int type, const int protocol)
+{
+    int retval = BS_SUCCESS;
+
+    retval = closeExistingSocket();
+
+    if (retval == BS_SUCCESS)
     {
         sockfd = socket(domain, type, protocol);
         retval = sockfd;
-        if (-1 == retval)
+        if (BS_ERROR == retval)
         {
             errcode = errno;
             char buffer[256];

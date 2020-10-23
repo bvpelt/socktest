@@ -54,6 +54,7 @@ private:
     bool validateDomain(const int domain);
     bool validateType(const int type);
     bool validateProtocol(const int protocol);
+    int closeExistingSocket();
 
 public:
     BSSocket();
@@ -63,8 +64,11 @@ public:
     int listensock();
     int acceptsock();
     int readsock(const int clientConnection);
+    int writesock(const void *buffer, const int len, const int flags);
     int create(const int domain, const int type, const int protocol);
     int setOptions(int level, int optname, const void *optval, int optlen);
+
+    int connect(const char *host, const char *port);
 
     int getAddrInfo(const char *portNumber, const int family, const int flags);
     void getAddrInfo();
