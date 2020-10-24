@@ -11,7 +11,7 @@ int main(int argc, char *argv[], char *envp[])
     int retval = BS_SUCCESS;
     string inputString = "";
 
-    //retval = client.startUp();
+    retval = client.startUp();
 
     while (inputString != "STOP")
     {
@@ -19,6 +19,8 @@ int main(int argc, char *argv[], char *envp[])
         getline(cin, inputString);
 
         cout << "Received: " << inputString << endl;
+
+        client.write(inputString, 0);
     }
 
     return retval;

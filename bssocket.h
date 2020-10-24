@@ -38,6 +38,14 @@
 #define BS_UNISTD_INCLUDED 1
 #endif
 
+#ifndef BS_BSEXCEPTION_INCLUDED
+#include "bsexception.h"
+#define BS_BSEXCEPTION_INCLUDED 1
+#endif
+
+#include <string>
+using namespace std;
+
 #define BS_MAX_ERROR_SIZE 256
 #define BS_ERROR -1
 #define BS_SUCCESS 0
@@ -46,15 +54,17 @@ class BSSocket
 {
 private:
     int sockfd;
-    int errcode;
+    //    int errcode;
     int backlog; // number of connections on incoming queue
     char errmsg[BS_MAX_ERROR_SIZE] = "";
-    addrinfo adresinfo;
+    char buffer[1024] = {0};
+    addrinfo adresinfo, *res;
 
     bool validateDomain(const int domain);
     bool validateType(const int type);
     bool validateProtocol(const int protocol);
     int closeExistingSocket();
+    void dbgMsg(const string msg);
 
 public:
     BSSocket();
@@ -63,8 +73,11 @@ public:
     int bindsock();
     int listensock();
     int acceptsock();
+    int readit();
     int readsock(const int clientConnection);
-    int writesock(const void *buffer, const int len, const int flags);
+    string getBuffer();
+    int writesock(const int connection, const void *buffer, const int len, const int flags);
+    int write(const void *buffer, const int len, const int flags);
     int create(const int domain, const int type, const int protocol);
     int setOptions(int level, int optname, const void *optval, int optlen);
 
@@ -72,7 +85,4 @@ public:
 
     int getAddrInfo(const char *portNumber, const int family, const int flags);
     void getAddrInfo();
-
-    char *getErrorMessage();
-    int getErrorCode();
 };

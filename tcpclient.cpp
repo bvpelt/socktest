@@ -1,5 +1,5 @@
 #include "tcpclient.h"
-
+#include <string.h>
 #include <iostream>
 using namespace std;
 
@@ -26,11 +26,23 @@ int TCPClient::startUp()
 {
     int retval = BS_SUCCESS;
 
-    retval = bssocket.connect(hostname, port);
-    if (retval == BS_ERROR)
+    try
     {
-        cerr << "Error during connect: " << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+        retval = bssocket.connect(hostname, port); // connect and creat socket
     }
+    catch (BSException ex)
+    {
+        cerr << "Exception occured " << ex.what() << endl;
+    }
+    return retval;
+}
+
+int TCPClient::write(const string buffer, int flags)
+{
+    void *bufferptr = (void *)buffer.data();
+    int len = buffer.length() + 1;
+    int retval = write(bufferptr, len, flags);
+
     return retval;
 }
 
@@ -38,10 +50,17 @@ int TCPClient::write(const void *buffer, int len, int flags)
 {
     int retval = 0;
 
-    retval = bssocket.writesock(buffer, len, flags);
-    if (retval == BS_ERROR)
+    try
     {
-        cerr << "Error during connect: " << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+        retval = bssocket.write(buffer, len, flags);
+    }
+    catch (BSException ex)
+    {
+        cerr << "Exception occured " << ex.what() << endl;
+    }
+    catch (exception ex)
+    {
+        cerr << "Exception occured " << ex.what() << endl;
     }
     return retval;
 }

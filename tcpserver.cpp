@@ -1,5 +1,6 @@
 #include "tcpserver.h"
 #include <iostream>
+#include <string>
 using namespace std;
 
 TCPServer::TCPServer()
@@ -22,57 +23,53 @@ int TCPServer::startUp()
 {
     int retval = BS_SUCCESS;
 
-    retval = bssocket.getAddrInfo(port, AF_INET, AI_PASSIVE); // AI_PASSIVE gives structure for server
-
-    if (BS_SUCCESS == retval)
+    try
     {
-        bssocket.getAddrInfo();
-    }
 
-    if (BS_SUCCESS == retval)
-    {
-        retval = bssocket.createsock();
+        retval = bssocket.getAddrInfo(port, AF_INET, AI_PASSIVE); // AI_PASSIVE gives structure for server
 
-        if (retval == BS_ERROR)
+        if (BS_SUCCESS == retval)
         {
-            cout << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+            bssocket.getAddrInfo();
         }
-    }
 
-    if (retval > BS_SUCCESS)
-    {
-        retval = bssocket.bindsock();
-        if (retval == BS_ERROR)
+        if (BS_SUCCESS == retval)
         {
-            cout << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+            retval = bssocket.createsock();
         }
-    }
 
-    if (retval == BS_SUCCESS)
-    {
-        retval = bssocket.listensock();
-        if (retval == BS_ERROR)
+        if (retval > BS_SUCCESS)
         {
-            cout << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+            retval = bssocket.bindsock();
         }
-    }
 
-    if (retval == BS_SUCCESS)
-    {
-        int clientConnection = bssocket.acceptsock();
-        if (clientConnection == BS_ERROR)
+        if (retval == BS_SUCCESS)
         {
-            cout << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+            retval = bssocket.listensock();
         }
-        else
+
+        if (retval == BS_SUCCESS)
         {
-            int bytesRead = bssocket.readsock(clientConnection);
-            if (retval == BS_ERROR)
+            int clientConnection = bssocket.acceptsock();
+
+            int bytesRead = 1;
+
+            while (bytesRead > 0)
             {
-                cout << bssocket.getErrorCode() << ": " << bssocket.getErrorMessage() << endl;
+                bytesRead = bssocket.readsock(clientConnection);
+
+                string clientmsg = bssocket.getBuffer();
+                cout << "Received: " << clientmsg << endl;
+                if (clientmsg == "STOP")
+                {
+                    bytesRead = -2;
+                }
             }
         }
     }
-
+    catch (BSException ex)
+    {
+        cerr << "Exception occured " << ex.what() << endl;
+    }
     return retval;
 }

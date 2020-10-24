@@ -8,12 +8,12 @@ DEBUGFLAG = -g
 CXXFLAGS = -O2 $(DEBUGFLAG) -march=x86-64
 
 # Objects
-objects = bssocket.o 
+objects = bssocket.o bsexception.o
 serverobjects = server.o tcpserver.o 
 clientobjects = client.o tcpclient.o
 
 .PHONY: ALL
-ALL: clean server client
+ALL: server client
 
 server: $(objects) $(serverobjects)
 	$(CXX) $(DEBUGFLAG) -o server $(objects) $(serverobjects)
@@ -28,6 +28,9 @@ server.o: server.cpp tcpserver.h
 	$(CXX) -c $(CXXFLAGS) $<
 
 client.o: client.cpp tcpclient.h
+	$(CXX) -c $(CXXFLAGS) $<
+
+bsexception.o: bsexception.cpp bsexception.h 
 	$(CXX) -c $(CXXFLAGS) $<
 
 tcpserver.o: tcpserver.cpp tcpserver.h bssocket.h

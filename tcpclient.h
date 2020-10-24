@@ -1,3 +1,9 @@
+#ifndef BS_STRING_INCLUDED
+#include <string>
+#define BS_STRING_INCLUDED 1
+#endif
+using namespace std;
+
 #include "bssocket.h"
 
 class TCPClient
@@ -6,6 +12,7 @@ private:
     BSSocket bssocket;
     char port[6] = "1223";
     char hostname[254] = "localhost";
+    int connection = 0; // connected socket
 
 public:
     TCPClient();
@@ -14,5 +21,6 @@ public:
 
     int startUp();
 
+    int write(const string buffer, int flags);
     int write(const void *buffer, int len, int flags);
 };

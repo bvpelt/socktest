@@ -10,7 +10,6 @@ using namespace std;
 BSSocket::BSSocket()
 {
     sockfd = 0;
-    errcode = 0;
     memset(&adresinfo, 0, sizeof(adresinfo));
 }
 
@@ -28,6 +27,16 @@ BSSocket::~BSSocket()
             sockfd = 0;
         }
     }
+}
+
+void BSSocket::dbgMsg(const string msg)
+{
+    char ip4[INET_ADDRSTRLEN]; // space to hold the IPv4 string
+    struct sockaddr_in sa;     // pretend this is loaded with something
+
+    inet_ntop(AF_INET, &(adresinfo), ip4, INET_ADDRSTRLEN);
+
+    cout << msg << ": " << ip4 << endl;
 }
 
 //
@@ -54,12 +63,11 @@ int BSSocket::bindsock()
 {
     int retval = 0;
 
+    dbgMsg("bind");
     retval = bind(sockfd, adresinfo.ai_addr, adresinfo.ai_addrlen);
     if (BS_ERROR == retval)
     {
-        errcode = errno;
-        char buffer[256];
-        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+        throw new BSException(errno, __FILE__, __LINE__);
     }
 
     return retval;
@@ -69,12 +77,11 @@ int BSSocket::listensock()
 {
     int retval = 0;
 
+    dbgMsg("listen");
     retval = listen(sockfd, backlog);
     if (BS_ERROR == retval)
     {
-        errcode = errno;
-        char buffer[256];
-        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+        throw new BSException(errno, __FILE__, __LINE__);
     }
 
     return retval;
@@ -91,12 +98,11 @@ int BSSocket::acceptsock()
     sockaddr_storage client_addr;
     socklen_t client_addr_size = sizeof(client_addr);
 
+    dbgMsg("accept");
     retval = accept(sockfd, (sockaddr *)&client_addr, &client_addr_size);
     if (BS_ERROR == retval)
     {
-        errcode = errno;
-        char buffer[256];
-        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+        throw new BSException(errno, __FILE__, __LINE__);
     }
 
     return retval;
@@ -112,15 +118,15 @@ int BSSocket::connect(const char *host, const char *port)
 
     if (BS_SUCCESS == retval)
     {
-        struct addrinfo *res;
         memset(&adresinfo, 0, sizeof(adresinfo));
+        adresinfo.ai_family = AF_INET;
+        adresinfo.ai_socktype = SOCK_STREAM;
+        adresinfo.ai_flags = AI_PASSIVE;
 
         retval = getaddrinfo(host, port, &adresinfo, &res);
         if (retval != BS_SUCCESS)
         {
-            errcode = errno;
-            char buffer[256];
-            strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+            throw new BSException(errno, __FILE__, __LINE__);
         }
         else
         {
@@ -137,31 +143,56 @@ int BSSocket::connect(const char *host, const char *port)
 //
 // server and client side
 //
+
+int BSSocket::readit()
+{
+    int valread = 0;
+
+    valread = readsock(sockfd);
+
+    return valread;
+}
+
 int BSSocket::readsock(const int clientConnection)
 {
     int valread = 0;
-    char buffer[1024] = {0};
 
+    dbgMsg("read");
     valread = read(clientConnection, buffer, sizeof(buffer));
     if (BS_ERROR == valread)
     {
-        errcode = errno;
-        char buffer[256];
-        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+        throw new BSException(errno, __FILE__, __LINE__);
+    }
+    else
+    {
+        buffer[valread + 1] = '\0';
     }
     return valread;
 }
 
-int BSSocket::writesock(const void *buffer, const int len, const int flags)
+string BSSocket::getBuffer()
+{
+    return buffer;
+}
+
+int BSSocket::write(const void *buffer, const int len, const int flags)
 {
     int valwritten = BS_SUCCESS;
 
-    valwritten = send(sockfd, buffer, len, flags);
+    valwritten = writesock(sockfd, buffer, len, flags);
+
+    return valwritten;
+}
+
+int BSSocket::writesock(const int connection, const void *buffer, const int len, const int flags)
+{
+    int valwritten = BS_SUCCESS;
+
+    dbgMsg("send");
+    valwritten = send(connection, buffer, len, flags);
     if (BS_ERROR == valwritten)
     {
-        errcode = errno;
-        char buffer[256];
-        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+        throw new BSException(errno, __FILE__, __LINE__);
     }
     return valwritten;
 }
@@ -175,6 +206,7 @@ int BSSocket::closeExistingSocket()
 
     if (sockfd > 0)
     { // socket already in use, might not occur so first close existing socket
+        dbgMsg("close");
         retval = close(sockfd);
         if (retval == 0)
         {
@@ -182,9 +214,7 @@ int BSSocket::closeExistingSocket()
         }
         else
         {
-            errcode = errno;
-            char buffer[256];
-            strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+            throw new BSException(errno, __FILE__, __LINE__);
         }
     }
     return retval;
@@ -198,13 +228,12 @@ int BSSocket::create(const int domain, const int type, const int protocol)
 
     if (retval == BS_SUCCESS)
     {
+        dbgMsg("socket");
         sockfd = socket(domain, type, protocol);
         retval = sockfd;
         if (BS_ERROR == retval)
         {
-            errcode = errno;
-            char buffer[256];
-            strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+            throw new BSException(errno, __FILE__, __LINE__);
         }
     }
     return retval;
@@ -214,7 +243,7 @@ int BSSocket::getAddrInfo(const char *portNumber, const int family, const int fl
 {
     int retval = 0;
 
-    addrinfo hints, *res, *p;
+    addrinfo hints;
     memset(&hints, 0, sizeof(hints));
 
     // for more explanation, man socket
@@ -226,9 +255,7 @@ int BSSocket::getAddrInfo(const char *portNumber, const int family, const int fl
 
     if (retval != 0)
     {
-        errcode = errno;
-        char buffer[256];
-        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+        throw new BSException(errno, __FILE__, __LINE__);
         return -2;
     }
     else
@@ -275,21 +302,9 @@ int BSSocket::setOptions(int level, int optname, const void *optval, int optlen)
     retval = setsockopt(sockfd, level, optname, optval, optlen);
     if (-1 == retval)
     {
-        errcode = errno;
-        char buffer[256];
-        strncpy(errmsg, strerror_r(errcode, buffer, 255), 256);
+        throw new BSException(errno, __FILE__, __LINE__);
     }
     return retval;
-}
-
-char *BSSocket::getErrorMessage()
-{
-    return errmsg;
-}
-
-int BSSocket::getErrorCode()
-{
-    return errcode;
 }
 
 // private parts
