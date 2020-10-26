@@ -7,15 +7,10 @@ TCPClient::TCPClient()
 {
 }
 
-TCPClient::TCPClient(const char *hostname, const char *portNumber)
+TCPClient::TCPClient(const string hostname, const string portNumber)
 {
-    int len = strnlen(portNumber, sizeof(port));
-    strncpy(port, portNumber, len);
-    port[len + 1] = '\0';
-
-    len = strnlen(hostname, sizeof(this->hostname));
-    strncpy(this->hostname, hostname, len);
-    this->hostname[len + 1] = '\0';
+    this->hostname = hostname;
+    this->port = portNumber;
 }
 
 TCPClient::~TCPClient()
@@ -28,7 +23,7 @@ int TCPClient::startUp()
 
     try
     {
-        retval = bssocket.connectsock(hostname, port); // connect and creat socket
+        retval = bssocket.connectsock(hostname.c_str(), port.c_str()); // connect and creat socket
     }
     catch (BSException ex)
     {
@@ -67,4 +62,22 @@ int TCPClient::write(const void *buffer, int len, int flags)
         cerr << "Unknown exception" << endl;
     }
     return retval;
+}
+
+void TCPClient::setHost(const string host)
+{
+    hostname = host;
+}
+const string TCPClient::getHost()
+{
+    return hostname;
+}
+
+void TCPClient::setPort(const string port)
+{
+    this->port = port;
+}
+const string TCPClient::getPort()
+{
+    return port;
 }

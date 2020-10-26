@@ -10,16 +10,22 @@ class TCPClient
 {
 private:
     BSSocket bssocket;
-    char port[6] = "1223";
-    char hostname[254] = "127.0.0.1";
+    string port = "1223";
+    string hostname = "localhost";
 
 public:
     TCPClient();
-    TCPClient(const char *hostname, const char *portNumber);
+    TCPClient(const string hostname, const string portNumber);
     ~TCPClient();
 
     int startUp();
 
     int write(const string buffer, int flags);
     int write(const void *buffer, int len, int flags);
+
+    void setHost(const string host);
+    const string getHost();
+
+    void setPort(const string port);
+    const string getPort();
 };
