@@ -11,8 +11,7 @@ class TCPClient
 private:
     BSSocket bssocket;
     char port[6] = "1223";
-    char hostname[254] = "localhost";
-    int connection = 0; // connected socket
+    char hostname[254] = "127.0.0.1";
 
 public:
     TCPClient();

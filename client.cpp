@@ -13,7 +13,8 @@ int main(int argc, char *argv[], char *envp[])
 
     retval = client.startUp();
 
-    while (inputString != "STOP")
+    bool goOn = true;
+    while (goOn)
     {
         cout << "Input: ";
         getline(cin, inputString);
@@ -21,6 +22,11 @@ int main(int argc, char *argv[], char *envp[])
         cout << "Received: " << inputString << endl;
 
         client.write(inputString, 0);
+
+        if (inputString.length() >= 4)
+        {
+            goOn = (inputString.substr(0, 4) != "STOP");
+        }
     }
 
     return retval;

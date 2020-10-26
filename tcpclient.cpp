@@ -28,7 +28,7 @@ int TCPClient::startUp()
 
     try
     {
-        retval = bssocket.connect(hostname, port); // connect and creat socket
+        retval = bssocket.connectsock(hostname, port); // connect and creat socket
     }
     catch (BSException ex)
     {
@@ -61,6 +61,10 @@ int TCPClient::write(const void *buffer, int len, int flags)
     catch (exception ex)
     {
         cerr << "Exception occured " << ex.what() << endl;
+    }
+    catch (...)
+    {
+        cerr << "Unknown exception" << endl;
     }
     return retval;
 }

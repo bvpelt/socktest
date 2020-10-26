@@ -32,11 +32,16 @@ BSSocket::~BSSocket()
 void BSSocket::dbgMsg(const string msg)
 {
     char ip4[INET_ADDRSTRLEN]; // space to hold the IPv4 string
-    struct sockaddr_in sa;     // pretend this is loaded with something
+    struct in_addr *sa;
+    sockaddr_in *ipv4 = reinterpret_cast<sockaddr_in *>(adresinfo.ai_addr);
+    sa = &(ipv4->sin_addr);
 
-    inet_ntop(AF_INET, &(adresinfo), ip4, INET_ADDRSTRLEN);
+    int port = ntohs(ipv4->sin_port);
+    // convert IPv4 and IPv6 addresses from binary to text form
 
-    cout << msg << ": " << ip4 << endl;
+    inet_ntop(AF_INET, sa, ip4, INET_ADDRSTRLEN);
+
+    cout << msg << ": " << ip4 << ":" << port << endl;
 }
 
 //
@@ -111,7 +116,7 @@ int BSSocket::acceptsock()
 //
 // client side
 //
-int BSSocket::connect(const char *host, const char *port)
+int BSSocket::connectsock(const char *host, const char *port)
 {
     int retval = BS_SUCCESS;
     retval = closeExistingSocket();
@@ -133,8 +138,28 @@ int BSSocket::connect(const char *host, const char *port)
             retval = create(res->ai_family, res->ai_socktype, res->ai_protocol);
             if (retval != BS_ERROR)
             {
+                memcpy(&adresinfo, res, sizeof(adresinfo));
                 sockfd = retval;
+                dbgMsg("socket");
+
+                retval = connect(sockfd, adresinfo.ai_addr, adresinfo.ai_addrlen);
+                if (retval != BS_SUCCESS)
+                {
+                    throw new BSException(errno, __FILE__, __LINE__);
+                }
+                else
+                {
+                    dbgMsg("connect");
+                }
             }
+            else
+            {
+                throw new BSException(errno, __FILE__, __LINE__);
+            }
+        }
+        if (res != NULL)
+        {
+            free(res);
         }
     }
     return retval;
@@ -228,7 +253,6 @@ int BSSocket::create(const int domain, const int type, const int protocol)
 
     if (retval == BS_SUCCESS)
     {
-        dbgMsg("socket");
         sockfd = socket(domain, type, protocol);
         retval = sockfd;
         if (BS_ERROR == retval)

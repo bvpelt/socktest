@@ -81,7 +81,7 @@ public:
     int create(const int domain, const int type, const int protocol);
     int setOptions(int level, int optname, const void *optval, int optlen);
 
-    int connect(const char *host, const char *port);
+    int connectsock(const char *host, const char *port);
 
     int getAddrInfo(const char *portNumber, const int family, const int flags);
     void getAddrInfo();
