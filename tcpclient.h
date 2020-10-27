@@ -1,10 +1,14 @@
+#ifndef BS_BSSOCKET_INCLUDED
+#include "bssocket.h"
+#define BS_BSSOCKET_INCLUDED 1
+#endif
+
 #ifndef BS_STRING_INCLUDED
 #include <string>
 #define BS_STRING_INCLUDED 1
 #endif
-using namespace std;
 
-#include "bssocket.h"
+using namespace std;
 
 class TCPClient
 {

@@ -1,18 +1,27 @@
-#include "tcpserver.h"
+#ifndef BS_IOSTREAM_INCLUDED
 #include <iostream>
+#define BS_IOSTREAM_INCLUDED 1
+#endif
+
+#ifndef BS_STRING_INCLUDED
 #include <string>
+#define BS_STRING_INCLUDED 1
+#endif
+
+#ifndef BS_TCPSERVER_INCLUDED
+#include "tcpserver.h"
+#define BS_TCPSERVER_INCLUDED 1
+#endif
+
 using namespace std;
 
 TCPServer::TCPServer()
 {
 }
 
-TCPServer::TCPServer(const char *portNumber)
+TCPServer::TCPServer(const string portNumber)
 {
-    int len = strlen(portNumber);
-    len = strnlen(portNumber, sizeof(port));
-    strncpy(port, portNumber, len);
-    port[len + 1] = '\0';
+    this->port = portNumber;
 }
 
 TCPServer::~TCPServer()
@@ -26,7 +35,7 @@ int TCPServer::startUp()
     try
     {
 
-        retval = bssocket.getAddrInfo(port, AF_INET, AI_PASSIVE); // AI_PASSIVE gives structure for server
+        retval = bssocket.getAddrInfo(port.c_str(), AF_INET, AI_PASSIVE); // AI_PASSIVE gives structure for server
 
         if (BS_SUCCESS == retval)
         {
@@ -72,4 +81,28 @@ int TCPServer::startUp()
         cerr << "Exception occured " << ex.what() << endl;
     }
     return retval;
+}
+
+void TCPServer::setPort(const string port)
+{
+    int len = port.length();
+    bool valid = true;
+    int i = 0;
+
+    while (valid && (i < len))
+    {
+        valid = isdigit(port[i]);
+        i++;
+    }
+
+    if (!valid)
+    {
+        throw BSException("Invalid number: " + port, __FILE__, __LINE__);
+    }
+    this->port = port;
+}
+
+string TCPServer::getPort()
+{
+    return port;
 }

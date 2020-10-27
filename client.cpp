@@ -1,7 +1,23 @@
-#include "tcpclient.h"
+#ifndef BS_STDIO_INCLUDED
 #include <stdio.h>
+#define BS_STDIO_INCLUDED 1
+#endif
+
+#ifndef BS_UNISTD_INCLUDED
 #include <unistd.h>
+#define BS_UNISTD_INCLUDED 1
+#endif
+
+#ifndef BS_IOSTREAM_INCLUDED
 #include <iostream>
+#define BS_IOSTREAM_INCLUDED 1
+#endif
+
+#ifndef BS_TCPCLIENT_INCLUDED
+#define BS_TCPCLIENT_INCLUDED 1
+#include "tcpclient.h"
+#endif
+
 using namespace std;
 
 int usage(const char *name)
@@ -15,7 +31,7 @@ int usage(const char *name)
 
 //
 // usage
-// ./client -h <host> -p <port> -?
+// ./client -h <host> -p <port> -u
 //
 int main(int argc, char *argv[], char *envp[])
 {
@@ -27,7 +43,6 @@ int main(int argc, char *argv[], char *envp[])
 
     string host = "localhost";
     string port = "1223";
-    bool help = false;
 
     int c;
     while ((c = getopt(argc, argv, "h:p:u")) != -1)
@@ -48,17 +63,16 @@ int main(int argc, char *argv[], char *envp[])
             break;
 
         default:
-            cerr << endl;
+            cerr << "Unknown argument: " << (char)c << ", ignored!" << endl;
         }
     }
 
     cout << "Host: " << host << " port: " << port << endl;
 
-    client.setHost(host);
-    client.setPort(port);
-
     try
     {
+        client.setHost(host);
+        client.setPort(port);
         retval = client.startUp();
 
         while (goOn)

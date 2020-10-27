@@ -1,6 +1,18 @@
+#ifndef BS_TCPCLIENT_INCLUDED
 #include "tcpclient.h"
+#define BS_TCPCLIENT_INCLUDED 1
+#endif
+
+#ifndef BS_STRING_H_INCLUDED
 #include <string.h>
+#define BS_STRING_H_INCLUDED 1
+#endif
+
+#ifndef BS_IOSTREAM_INCLUDED
 #include <iostream>
+#define BS_IOSTREAM_INCLUDED 1
+#endif
+
 using namespace std;
 
 TCPClient::TCPClient()
@@ -75,8 +87,24 @@ const string TCPClient::getHost()
 
 void TCPClient::setPort(const string port)
 {
+    int len = port.length();
+    bool valid = true;
+    int i = 0;
+
+    while (valid && (i < len))
+    {
+        valid = isdigit(port[i]);
+        i++;
+    }
+
+    if (!valid)
+    {
+        throw BSException("Invalid number: " + port, __FILE__, __LINE__);
+    }
+
     this->port = port;
 }
+
 const string TCPClient::getPort()
 {
     return port;

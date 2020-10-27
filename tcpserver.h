@@ -3,16 +3,26 @@
 #define BSSOCKET_INCLUDED 1
 #endif
 
+#ifndef BS_STRING_INCLUDED
+#include <string>
+#define BS_STRING_INCLUDED 1
+#endif
+
+using namespace std;
+
 class TCPServer
 {
 private:
     BSSocket bssocket;
-    char port[6] = "1223";
+    string port = "1223";
 
 public:
     TCPServer();
-    TCPServer(const char *portNumber);
+    TCPServer(const string portNumber);
     ~TCPServer();
 
     int startUp();
+
+    void setPort(const string port);
+    string getPort();
 };

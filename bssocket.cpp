@@ -3,8 +3,16 @@
 #define BS_BSSOCKET_INCLUDED 1
 #endif
 
+#ifndef BS_STRING_INCLUDED
 #include <string>
+#define BS_STRING_INCLUDED 1
+#endif
+
+#ifndef BS_IOSTREAM_INCLUDED
 #include <iostream>
+#define BS_IOSTREAM_INCLUDED 1
+#endif
+
 using namespace std;
 
 BSSocket::BSSocket()

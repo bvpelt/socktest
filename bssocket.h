@@ -23,9 +23,9 @@
 #define BS_ARPA_INET_INCLUDED 1
 #endif
 
-#ifndef BS_STRING_INCLUDED
+#ifndef BS_STRING_H_INCLUDED
 #include <string.h>
-#define BS_STRING_INCLUDED 1
+#define BS_STRING_H_INCLUDED 1
 #endif
 
 #ifndef BS_STDIO_INCLUDED
@@ -38,12 +38,16 @@
 #define BS_UNISTD_INCLUDED 1
 #endif
 
+#ifndef BS_STRING_INCLUDED
+#include <string>
+#define BS_STRING_INCLUDED 1
+#endif
+
 #ifndef BS_BSEXCEPTION_INCLUDED
 #include "bsexception.h"
 #define BS_BSEXCEPTION_INCLUDED 1
 #endif
 
-#include <string>
 using namespace std;
 
 #define BS_MAX_ERROR_SIZE 256

@@ -36,6 +36,14 @@ BSException::BSException(const int errcode, const string source, const int linen
     this->lineno = lineno;
 }
 
+BSException::BSException(const string message, const string source, const int lineno)
+{
+    errcode = -1;
+    errmsg = message;
+    this->source = source;
+    this->lineno = lineno;
+}
+
 int BSException::getErrorCode()
 {
     return errcode;
