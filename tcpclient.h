@@ -15,6 +15,7 @@ class TCPClient
 private:
     BSSocket bssocket;
     string port = "1223";
+    int version = 4; // valid 4 or 6
     string hostname = "localhost";
 
 public:
@@ -32,4 +33,7 @@ public:
 
     void setPort(const string port);
     const string getPort();
+
+    void setVersion(const int version);
+    const int getVersion();
 };

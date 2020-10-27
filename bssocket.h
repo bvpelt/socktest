@@ -58,7 +58,7 @@ class BSSocket
 {
 private:
     int sockfd;
-    //    int errcode;
+    bool showDebug = true;
     int backlog; // number of connections on incoming queue
     char errmsg[BS_MAX_ERROR_SIZE] = "";
     char buffer[1024] = {0};
@@ -69,6 +69,8 @@ private:
     bool validateProtocol(const int protocol);
     int closeExistingSocket();
     void dbgMsg(const string msg);
+    string getInet4Adres();
+    string getInet6Adres();
 
 public:
     BSSocket();
@@ -85,8 +87,11 @@ public:
     int create(const int domain, const int type, const int protocol);
     int setOptions(int level, int optname, const void *optval, int optlen);
 
-    int connectsock(const char *host, const char *port);
+    int connectsock(const char *host, const char *port, const int version);
 
     int getAddrInfo(const char *portNumber, const int family, const int flags);
     void getAddrInfo();
+
+    bool getDebug();
+    void setDebug(const bool debug);
 };

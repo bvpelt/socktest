@@ -31,21 +31,20 @@ int usage(const char *name)
 
 //
 // usage
-// ./client -h <host> -p <port> -u
+// ./client -h <host> -p <port> -u -4 -6
 //
 int main(int argc, char *argv[], char *envp[])
 {
-
     TCPClient client;
     bool goOn = true;
     int retval = BS_SUCCESS;
     string inputString = "";
-
+    int version = 4;
     string host = "localhost";
     string port = "1223";
 
     int c;
-    while ((c = getopt(argc, argv, "h:p:u")) != -1)
+    while ((c = getopt(argc, argv, "h:p:u46")) != -1)
     {
         switch (c)
         {
@@ -55,6 +54,14 @@ int main(int argc, char *argv[], char *envp[])
 
         case 'p':
             port = optarg;
+            break;
+
+        case '4':
+            version = 4;
+            break;
+
+        case '6':
+            version = 6;
             break;
 
         case 'u':
@@ -73,6 +80,7 @@ int main(int argc, char *argv[], char *envp[])
     {
         client.setHost(host);
         client.setPort(port);
+        client.setVersion(version);
         retval = client.startUp();
 
         while (goOn)

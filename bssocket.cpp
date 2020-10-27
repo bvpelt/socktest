@@ -13,6 +13,11 @@
 #define BS_IOSTREAM_INCLUDED 1
 #endif
 
+#ifndef BS_SSTREAM_INCLUDED
+#include <sstream>
+#define BS_SSTREAM_INCLUDED 1
+#endif
+
 using namespace std;
 
 BSSocket::BSSocket()
@@ -37,9 +42,10 @@ BSSocket::~BSSocket()
     }
 }
 
-void BSSocket::dbgMsg(const string msg)
+string BSSocket::getInet4Adres()
 {
-    char ip4[INET_ADDRSTRLEN]; // space to hold the IPv4 string
+    char ipstr[INET6_ADDRSTRLEN]; // space to hold the IPv4 string
+    ostringstream str;
     struct in_addr *sa;
     sockaddr_in *ipv4 = reinterpret_cast<sockaddr_in *>(adresinfo.ai_addr);
     sa = &(ipv4->sin_addr);
@@ -47,9 +53,58 @@ void BSSocket::dbgMsg(const string msg)
     int port = ntohs(ipv4->sin_port);
     // convert IPv4 and IPv6 addresses from binary to text form
 
-    inet_ntop(AF_INET, sa, ip4, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, sa, ipstr, sizeof(ipstr));
 
-    cout << msg << ": " << ip4 << ":" << port << endl;
+    str << ipstr << ":" << port << endl;
+
+    return str.str().c_str();
+}
+
+string BSSocket::getInet6Adres()
+{
+    char ipstr[INET6_ADDRSTRLEN]; // space to hold the IPv4 string
+    ostringstream str;
+    struct in6_addr *sa;
+
+    struct sockaddr_in6 *ipv6 = reinterpret_cast<sockaddr_in6 *>(adresinfo.ai_addr);
+    sa = &(ipv6->sin6_addr);
+
+    int port = ntohs(ipv6->sin6_port);
+    // convert IPv4 and IPv6 addresses from binary to text form
+
+    inet_ntop(AF_INET6, sa, ipstr, sizeof(ipstr));
+
+    str << ipstr << ":" << port;
+
+    return str.str().c_str();
+}
+
+void BSSocket::dbgMsg(const string msg)
+{
+    if (showDebug)
+    {
+        if (adresinfo.ai_family == AF_INET)
+        {
+            cout << msg << " " << getInet4Adres() << endl;
+        }
+        else if (adresinfo.ai_family == AF_INET6)
+        {
+            cout << msg << " " << getInet6Adres() << endl;
+        }
+        else
+        {
+            throw BSException("Unknown family", __FILE__, __LINE__);
+        }
+    }
+}
+
+bool BSSocket::getDebug()
+{
+    return showDebug;
+}
+void BSSocket::setDebug(const bool debug)
+{
+    this->showDebug = debug;
 }
 
 //
@@ -124,7 +179,7 @@ int BSSocket::acceptsock()
 //
 // client side
 //
-int BSSocket::connectsock(const char *host, const char *port)
+int BSSocket::connectsock(const char *host, const char *port, const int version)
 {
     int retval = BS_SUCCESS;
     retval = closeExistingSocket();
@@ -132,7 +187,14 @@ int BSSocket::connectsock(const char *host, const char *port)
     if (BS_SUCCESS == retval)
     {
         memset(&adresinfo, 0, sizeof(adresinfo));
-        adresinfo.ai_family = AF_INET;
+        if (version == 4)
+        {
+            adresinfo.ai_family = AF_INET;
+        }
+        if (version == 6)
+        {
+            adresinfo.ai_family = AF_INET6;
+        }
         adresinfo.ai_socktype = SOCK_STREAM;
         adresinfo.ai_flags = AI_PASSIVE;
 
@@ -310,8 +372,7 @@ void BSSocket::getAddrInfo()
 
         // convert IPv4 and IPv6 addresses from binary to text form
         inet_ntop(adresinfo.ai_family, addr, ipStr, sizeof(ipStr));
-        std::cout << ipVer << " : " << ipStr
-                  << std::endl;
+        cout << ipVer << " : " << ipStr << endl;
     }
 
     if (adresinfo.ai_family == AF_INET6)
@@ -322,8 +383,7 @@ void BSSocket::getAddrInfo()
 
         // convert IPv4 and IPv6 addresses from binary to text form
         inet_ntop(adresinfo.ai_family, addr, ipStr, sizeof(ipStr));
-        std::cout << ipVer << " : " << ipStr
-                  << std::endl;
+        cout << ipVer << " : " << ipStr << endl;
     }
 }
 

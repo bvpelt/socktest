@@ -35,7 +35,7 @@ int TCPClient::startUp()
 
     try
     {
-        retval = bssocket.connectsock(hostname.c_str(), port.c_str()); // connect and creat socket
+        retval = bssocket.connectsock(hostname.c_str(), port.c_str(), version); // connect and creat socket
     }
     catch (BSException ex)
     {
@@ -108,4 +108,22 @@ void TCPClient::setPort(const string port)
 const string TCPClient::getPort()
 {
     return port;
+}
+
+void TCPClient::setVersion(const int version)
+{
+
+    if ((version == 4) || (version == 6))
+    {
+        this->version = version;
+    }
+    else
+    {
+        throw BSException("Invalid inet version only 4 or 6 allowed", __FILE__, __LINE__);
+    }
+}
+
+const int TCPClient::getVersion()
+{
+    return version;
 }

@@ -34,9 +34,14 @@ int TCPServer::startUp()
 
     try
     {
-
-        retval = bssocket.getAddrInfo(port.c_str(), AF_INET, AI_PASSIVE); // AI_PASSIVE gives structure for server
-
+        if (ipver == 4)
+        {
+            retval = bssocket.getAddrInfo(port.c_str(), AF_INET, AI_PASSIVE); // AI_PASSIVE gives structure for server
+        }
+        if (ipver == 6)
+        {
+            retval = bssocket.getAddrInfo(port.c_str(), AF_INET6, AI_PASSIVE); // AI_PASSIVE gives structure for server
+        }
         if (BS_SUCCESS == retval)
         {
             bssocket.getAddrInfo();
@@ -105,4 +110,21 @@ void TCPServer::setPort(const string port)
 string TCPServer::getPort()
 {
     return port;
+}
+
+void TCPServer::setIPVersion(const int version)
+{
+    if ((version == 4) || (version == 6))
+    {
+        this->ipver = version;
+    }
+    else
+    {
+        throw BSException("Unsupported version only 4 or 6 allowed", __FILE__, __LINE__);
+    }
+}
+
+int TCPServer::getIPVersion()
+{
+    return this->ipver;
 }
