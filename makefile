@@ -4,8 +4,11 @@ CXX = g++
 # Debug flag
 DEBUGFLAG = -g
 
+# Optimeze flag
+OPTIMIZE =
+
 # Compile flags
-CXXFLAGS = -O2 $(DEBUGFLAG) -march=x86-64
+CXXFLAGS = $(OPTIMIZE) $(DEBUGFLAG) -march=x86-64
 
 # Objects
 objects = bssocket.o bsexception.o

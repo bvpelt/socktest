@@ -10,6 +10,8 @@
 
 using namespace std;
 
+typedef int SocketHandlerType(BSSocket *);
+
 class TCPServer
 {
 private:
@@ -17,6 +19,7 @@ private:
     string port = "1223";
     int ipver = 4; // possible values 4 of 6
     bool debug = false;
+    SocketHandlerType *socketHandler = 0;
 
 public:
     TCPServer();
@@ -33,4 +36,7 @@ public:
 
     void setIPVersion(const int version);
     int getIPVersion();
+
+    void setSocketHandler(const SocketHandlerType handler);
+    SocketHandlerType *getSocketHandler();
 };

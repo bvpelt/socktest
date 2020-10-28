@@ -58,8 +58,8 @@ class BSSocket
 {
 private:
     int sockfd;
-    bool showDebug = true;
-    int backlog; // number of connections on incoming queue
+    bool showDebug = false;
+    int backlog = 0; // number of connections on incoming queue
     char errmsg[BS_MAX_ERROR_SIZE] = "";
     char buffer[1024] = {0};
     addrinfo adresinfo, *res;
@@ -74,6 +74,7 @@ private:
 
 public:
     BSSocket();
+    BSSocket(const int clientConnection);
     ~BSSocket();
     int createsock();
     int bindsock();
@@ -94,4 +95,7 @@ public:
 
     bool getDebug();
     void setDebug(const bool debug);
+
+    int getBacklog();
+    void setBacklog(const int backlog);
 };

@@ -67,7 +67,7 @@ int BSException::getLineNo()
 const char *BSException::what() const throw()
 {
     ostringstream str;
-    str << "Error (" << errcode << "): " << errmsg << " on " << lineno << " in file: " << source;
+    str << "Error (" << errcode << "): " << errmsg << " - " << source << "(" << lineno << ")" << source;
     return str.str().c_str();
 }
 

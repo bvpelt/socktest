@@ -26,6 +26,10 @@ BSSocket::BSSocket()
     memset(&adresinfo, 0, sizeof(adresinfo));
 }
 
+BSSocket::BSSocket(const int clientConnection)
+{
+    this->sockfd = clientConnection;
+}
 //
 // Remove claimed resources
 //
@@ -105,6 +109,15 @@ bool BSSocket::getDebug()
 void BSSocket::setDebug(const bool debug)
 {
     this->showDebug = debug;
+}
+
+int BSSocket::getBacklog()
+{
+    return backlog;
+}
+void BSSocket::setBacklog(const int backlog)
+{
+    this->backlog = backlog;
 }
 
 //

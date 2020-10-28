@@ -21,6 +21,33 @@ int usage(const char *name)
     return BS_SUCCESS;
 }
 
+int socketHandler(BSSocket *socket)
+{
+    int retval = BS_SUCCESS;
+    try
+    {
+        int bytesRead = 1;
+
+        while (bytesRead > 0)
+        {
+            bytesRead = socket->readit();
+
+            string clientmsg = socket->getBuffer();
+            cout << "Received: " << clientmsg << endl;
+            if (clientmsg == "STOP")
+            {
+                bytesRead = -2;
+            }
+        }
+    }
+    catch (...)
+    {
+        delete socket;
+        retval = BS_ERROR;
+    }
+
+    return retval;
+}
 //
 // usage
 // ./server -p <port> -u
@@ -72,11 +99,13 @@ int main(int argc, char *argv[], char *envp[])
         server.setPort(port);
         server.setIPVersion(version);
         server.setDebug(debug);
+        server.setSocketHandler(socketHandler);
+
         retval = server.startUp();
     }
     catch (BSException ex)
     {
-        cerr << "Error (" << ex.getErrorCode() << "): " << ex.getErrorMessage() << " - " << ex.getSourceFile() << "(" << ex.getLineNo() << ")" << endl;
+        cerr << ex.what() << endl;
     }
 
     return retval;

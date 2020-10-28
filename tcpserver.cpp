@@ -68,18 +68,12 @@ int TCPServer::startUp()
         {
             int clientConnection = bssocket.acceptsock();
 
-            int bytesRead = 1;
-
-            while (bytesRead > 0)
+            if (socketHandler != NULL)
             {
-                bytesRead = bssocket.readsock(clientConnection);
+                BSSocket *socket = new BSSocket(clientConnection);
+                socket->setBacklog(bssocket.getBacklog());
 
-                string clientmsg = bssocket.getBuffer();
-                cout << "Received: " << clientmsg << endl;
-                if (clientmsg == "STOP")
-                {
-                    bytesRead = -2;
-                }
+                retval = socketHandler(socket);
             }
         }
     }
@@ -139,4 +133,13 @@ void TCPServer::setIPVersion(const int version)
 int TCPServer::getIPVersion()
 {
     return this->ipver;
+}
+
+void TCPServer::setSocketHandler(const SocketHandlerType handler)
+{
+    this->socketHandler = handler;
+}
+SocketHandlerType *TCPServer::getSocketHandler()
+{
+    return this->socketHandler;
 }
