@@ -64,10 +64,23 @@ int TCPServer::startUp()
             retval = bssocket.listensock();
         }
 
+        //
+        // initialize worklist, this is a list with connections and state (STARTED, ACTIVE, CLOSED)
+        //
+
+        //
+        // manager worker with dynamic pool
+        //
+        // start manager thread to get work from the worklist (with mutex) and start a worker
+        //
+
         if (retval == BS_SUCCESS)
         {
             int clientConnection = bssocket.acceptsock();
 
+            //
+            // add clientconnection to worklist (with mutex)
+            //
             if (socketHandler != NULL)
             {
                 BSSocket *socket = new BSSocket(clientConnection);
