@@ -17,6 +17,7 @@ private:
     string port = "1223";
     int version = 4; // valid 4 or 6
     string hostname = "localhost";
+    bool debug;
 
 public:
     TCPClient();
@@ -27,6 +28,9 @@ public:
 
     int write(const string buffer, int flags);
     int write(const void *buffer, int len, int flags);
+
+    void setDebug(const bool debug);
+    bool getDebug();
 
     void setHost(const string host);
     const string getHost();

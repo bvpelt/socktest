@@ -14,6 +14,7 @@ int usage(const char *name)
 {
     cout << "Usage " << name << " -p <port> -u" << endl;
     cout << " -p <port> port to connect to" << endl;
+    cout << " -d        show debug messages" << endl;
     cout << " -4" << endl;
     cout << " -6" << endl;
     cout << " -u         this message" << endl;
@@ -31,12 +32,17 @@ int main(int argc, char *argv[], char *envp[])
     int retval = BS_SUCCESS;
     int version = 4;
     string port = "1223";
+    bool debug = false;
 
     int c;
-    while ((c = getopt(argc, argv, "p:u46")) != -1)
+    while ((c = getopt(argc, argv, "dp:u46")) != -1)
     {
         switch (c)
         {
+        case 'd':
+            debug = true;
+            break;
+
         case 'p':
             port = optarg;
             break;
@@ -59,12 +65,13 @@ int main(int argc, char *argv[], char *envp[])
         }
     }
 
-    cout << " port: " << port << endl;
+    cout << "port: " << port << endl;
 
     try
     {
         server.setPort(port);
         server.setIPVersion(version);
+        server.setDebug(debug);
         retval = server.startUp();
     }
     catch (BSException ex)

@@ -42,12 +42,17 @@ int main(int argc, char *argv[], char *envp[])
     int version = 4;
     string host = "localhost";
     string port = "1223";
+    bool debug = false;
 
     int c;
-    while ((c = getopt(argc, argv, "h:p:u46")) != -1)
+    while ((c = getopt(argc, argv, "dh:p:u46")) != -1)
     {
         switch (c)
         {
+        case 'd':
+            debug = true;
+            break;
+
         case 'h':
             host = optarg;
             break;
@@ -81,6 +86,7 @@ int main(int argc, char *argv[], char *envp[])
         client.setHost(host);
         client.setPort(port);
         client.setVersion(version);
+        client.setDebug(debug);
         retval = client.startUp();
 
         while (goOn)

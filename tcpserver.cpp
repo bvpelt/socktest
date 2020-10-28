@@ -34,6 +34,8 @@ int TCPServer::startUp()
 
     try
     {
+        bssocket.setDebug(debug);
+
         if (ipver == 4)
         {
             retval = bssocket.getAddrInfo(port.c_str(), AF_INET, AI_PASSIVE); // AI_PASSIVE gives structure for server
@@ -86,6 +88,16 @@ int TCPServer::startUp()
         cerr << "Exception occured " << ex.what() << endl;
     }
     return retval;
+}
+
+void TCPServer::setDebug(const bool debug)
+{
+    this->debug = debug;
+}
+
+bool TCPServer::getDebug()
+{
+    return debug;
 }
 
 void TCPServer::setPort(const string port)

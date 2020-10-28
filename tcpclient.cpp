@@ -35,6 +35,7 @@ int TCPClient::startUp()
 
     try
     {
+        bssocket.setDebug(debug);
         retval = bssocket.connectsock(hostname.c_str(), port.c_str(), version); // connect and creat socket
     }
     catch (BSException ex)
@@ -83,6 +84,15 @@ void TCPClient::setHost(const string host)
 const string TCPClient::getHost()
 {
     return hostname;
+}
+
+void TCPClient::setDebug(const bool debug)
+{
+    this->debug = debug;
+}
+bool TCPClient::getDebug()
+{
+    return debug;
 }
 
 void TCPClient::setPort(const string port)
