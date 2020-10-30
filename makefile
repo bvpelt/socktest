@@ -55,7 +55,7 @@ testworklist.o: testworklist.cpp worklist.h
 	$(CXX) -c $(CXXFLAGS) $<
 
 testworklist: $(objects) $(testworklistobjects)
-	$(CXX) $(DEBUGFLAG) -o testworklist $(objects) $(testworklistobjects)
+	$(CXX) $(DEBUGFLAG) -pthread -o testworklist $(objects) $(testworklistobjects)
 #
 # run clean without error checking
 #	
