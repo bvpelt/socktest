@@ -14,9 +14,10 @@ CXXFLAGS = $(OPTIMIZE) $(DEBUGFLAG) -march=x86-64
 objects = bssocket.o bsexception.o work.o worklist.o
 serverobjects = server.o tcpserver.o 
 clientobjects = client.o tcpclient.o
+testworklistobjects = testworklist.o
 
 .PHONY: ALL
-ALL: server client
+ALL: server client testworklist
 
 server: $(objects) $(serverobjects)
 	$(CXX) $(DEBUGFLAG) -o server $(objects) $(serverobjects)
@@ -47,10 +48,14 @@ tcpclient.o: tcpclient.cpp tcpclient.h bssocket.h
 work.o: work.cpp work.h 
 	$(CXX) -c $(CXXFLAGS) $<
 
-
 worklist.o: worklist.cpp worklist.h 
 	$(CXX) -c $(CXXFLAGS) $<
 
+testworklist.o: testworklist.cpp worklist.h
+	$(CXX) -c $(CXXFLAGS) $<
+
+testworklist: $(objects) $(testworklistobjects)
+	$(CXX) $(DEBUGFLAG) -o testworklist $(objects) $(testworklistobjects)
 #
 # run clean without error checking
 #	

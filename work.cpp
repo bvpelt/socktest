@@ -1,4 +1,13 @@
+#ifndef BS_SSTREAM_INCLUDED
+#include <sstream>
+#define BS_SSTREAM_INCLUDED 1
+#endif
+using namespace std;
+
+#ifndef WORK_INCLUDED
 #include "work.h"
+#define WORK_INCLUDED 1
+#endif
 
 Work::Work()
 {
@@ -9,6 +18,13 @@ Work::Work(const int connection, const int status, const int retval)
     this->connection = connection;
     this->status = status;
     this->retval = retval;
+}
+
+Work::Work(const Work &w)
+{
+    this->connection = w.connection;
+    this->status = w.status;
+    this->retval = w.retval;
 }
 
 Work::~Work()
@@ -43,4 +59,19 @@ int Work::getRetval()
 void Work::setRetval(const int retval)
 {
     this->retval = retval;
+}
+/*
+string Work::toString()
+{
+    ostringstream str;
+
+    str << "connection: " << connection << " status: " << status << " retval: " << retval;
+
+    return str.str();
+}
+*/
+ostream &operator<<(ostream &str, Work const &w)
+{
+    str << "connection: " << w.connection << " status: " << w.status << " retval: " << w.retval;
+    return str;
 }

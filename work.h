@@ -1,3 +1,9 @@
+#include <string>
+using namespace std;
+
+#define WORK_STARTED 0
+#define WORK_ACTIVE 1
+#define WORK_ENDED 2
 
 class Work
 {
@@ -9,6 +15,7 @@ private:
 public:
     Work();
     Work(const int connection, const int status, const int retval);
+    Work(const Work &w);
     ~Work();
 
     int getConnection();
@@ -17,4 +24,7 @@ public:
     void setStatus(const int status);
     int getRetval();
     void setRetval(const int retval);
+    string toString();
+
+    friend ostream &operator<<(ostream &_stream, Work const &w);
 };
