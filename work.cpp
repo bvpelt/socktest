@@ -60,16 +60,7 @@ void Work::setRetval(const int retval)
 {
     this->retval = retval;
 }
-/*
-string Work::toString()
-{
-    ostringstream str;
 
-    str << "connection: " << connection << " status: " << status << " retval: " << retval;
-
-    return str.str();
-}
-*/
 ostream &operator<<(ostream &str, Work const &w)
 {
     str << "connection: " << w.connection << " status: " << w.status << " retval: " << w.retval;

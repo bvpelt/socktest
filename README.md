@@ -9,3 +9,17 @@
 
 # Makefile
 - https://www.gnu.org/software/make/manual/make.html
+
+# Valgrind
+Valgrind is tooling to check for memory leaks and threads behaviour.
+It is downloadable through 
+```bash
+ $ git clone git://sourceware.org/git/valgrind.git
+ ```
+
+ Documentation visable at: https://www.valgrind.org/docs/manual/manual.html 
+
+ ## usage
+ ```bash
+ $ valgrind --leak-check=yes ./mlist
+ ```

@@ -17,7 +17,7 @@ clientobjects = client.o tcpclient.o
 testworklistobjects = testworklist.o
 
 .PHONY: ALL
-ALL: server client testworklist
+ALL: server client testworklist cvsimple
 
 server: $(objects) $(serverobjects)
 	$(CXX) $(DEBUGFLAG) -o server $(objects) $(serverobjects)
@@ -52,10 +52,27 @@ worklist.o: worklist.cpp worklist.h
 	$(CXX) -c $(CXXFLAGS) $<
 
 testworklist.o: testworklist.cpp worklist.h
-	$(CXX) -c $(CXXFLAGS) $<
+	$(CXX) -c $(CXXFLAGS) -pthread $<
 
 testworklist: $(objects) $(testworklistobjects)
 	$(CXX) $(DEBUGFLAG) -pthread -o testworklist $(objects) $(testworklistobjects)
+
+
+cvsimple.o: cvsimple.cpp 
+	$(CXX) -c $(CXXFLAGS) -pthread $<
+
+cvsimple: cvsimple.o
+	$(CXX) $(DEBUGFLAG) -pthread -o cvsimple cvsimple.o
+
+mtest: mtest.o
+	$(CXX) $(DEBUGFLAG) -pthread -o mtest mtest.o	
+
+
+linkedlist.o: linkedlist.cpp linkedlist.h element.h work.h
+	$(CXX) -c $(CXXFLAGS) $<
+
+mlist: mlist.o work.o linkedlist.h element.h
+	$(CXX) $(DEBUGFLAG) -pthread -o mlist mlist.o work.o
 #
 # run clean without error checking
 #	

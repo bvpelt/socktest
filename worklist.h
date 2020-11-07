@@ -4,16 +4,14 @@
 #define LIST_INCLUDED 1
 #endif
 
-/*
-#ifndef VECTOR_INCLUDED
-#include <vector>
-#define VECTOR_INCLUDED 1
-#endif
-*/
-
 #ifndef WORK_INCLUDED
 #include "work.h"
 #define WORK_INCLUDED 1
+#endif
+
+#ifndef PTHEAD_INCLUDED
+#include <pthread.h>
+#define PTHEAD_INCLUDED 1
 #endif
 
 using namespace std;
@@ -21,14 +19,16 @@ using namespace std;
 class Worklist
 {
 private:
-    list<Work> worklist;
+    list<Work *> worklist;
 
 public:
     Worklist();
     ~Worklist();
 
-    int addWork(const Work work);
+    int addWork(Work *work);
+    Work *getWork();
     int cleanup();
-    list<Work>::iterator getBegin();
-    list<Work>::iterator getEnd();
+    int size();
+    list<Work *>::iterator getBegin();
+    list<Work *>::iterator getEnd();
 };
