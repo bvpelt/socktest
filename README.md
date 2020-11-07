@@ -21,5 +21,9 @@ It is downloadable through
 
  ## usage
  ```bash
+ $ # memory checks
  $ valgrind --leak-check=yes ./mlist
+ $
+ $ # thread checks
+ $ valgrind --tool=helgrind  ./cvsimple 
  ```
