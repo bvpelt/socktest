@@ -9,6 +9,7 @@
 #endif
 
 #include <unistd.h>
+#include <signal.h>
 
 #include <iostream>
 using namespace std;
@@ -48,6 +49,7 @@ void dotest01()
 
 static const int success = 0;
 static const int error = -1;
+bool goOn = true;
 
 struct parameterType
 {
@@ -56,6 +58,11 @@ struct parameterType
     int threadid;
     pthread_mutex_t *output_mutex;
 };
+
+void my_function(int sig)
+{                 // can be called asynchronously
+    goOn = false; // set flag
+}
 
 void *consume(void *arg)
 {
@@ -81,6 +88,7 @@ void *consume(void *arg)
             cout << "Thread: " << threadid << " Work: " << *w << endl;
             pthread_mutex_unlock(output_mutex);
             delete w;
+            usleep(50000);
         }
     }
     delete parameter;
@@ -103,14 +111,11 @@ void *produce(void *arg)
     cout << "Thread: " << parameter->threadid << " started (producer)" << endl;
     pthread_mutex_unlock(output_mutex);
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 1000; i++)
     {
-        Work *w = new Work(i, 0, 100 + 1);
+        Work *w = new Work(i, 0, 100 + i);
         linkedList->addData(w);
     }
-
-    sleep(20);
-    *parameter->goOn = false;
 
     delete parameter;
 
@@ -124,7 +129,7 @@ void *produce(void *arg)
 void dotest02()
 {
     const int poolsize = 3;
-    bool goOn = true;
+
     LinkedList<Work> ll;
     pthread_t producerThread;
     void *statusp;
@@ -165,5 +170,7 @@ void dotest02()
 
 int main(int argc, char *argv[], char *envp[])
 {
+    // Register signals
+    signal(SIGINT, my_function);
     dotest02();
 }
