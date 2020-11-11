@@ -61,6 +61,11 @@ void Work::setRetval(const int retval)
     this->retval = retval;
 }
 
+pthread_t *Work::getThreadAdres()
+{
+    return &this->thread;
+}
+
 ostream &operator<<(ostream &str, Work const &w)
 {
     str << "connection: " << w.connection << " status: " << w.status << " retval: " << w.retval;

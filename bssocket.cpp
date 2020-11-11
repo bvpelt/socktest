@@ -18,6 +18,11 @@
 #define BS_SSTREAM_INCLUDED 1
 #endif
 
+#include <stdio.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 using namespace std;
 
 BSSocket::BSSocket()
@@ -180,10 +185,37 @@ int BSSocket::acceptsock()
     socklen_t client_addr_size = sizeof(client_addr);
 
     dbgMsg("accept");
-    retval = accept(sockfd, (sockaddr *)&client_addr, &client_addr_size);
-    if (BS_ERROR == retval)
+
+    fd_set rfds;
+    struct timeval tv;
+    FD_ZERO(&rfds);
+    FD_SET(sockfd, &rfds);
+
+    /* Wait up to one seconds. */
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+
+    retval = select(sockfd + 1, &rfds, NULL, NULL, &tv);
+
+    if (retval == -1)
     {
-        throw new BSException(errno, __FILE__, __LINE__);
+        perror("select()");
+        if (errno == EINTR)
+        {
+            retval = -5;
+        }
+    }
+    else if (retval) // data available
+    {
+        retval = accept(sockfd, (sockaddr *)&client_addr, &client_addr_size);
+        if (BS_ERROR == retval)
+        {
+            throw new BSException(errno, __FILE__, __LINE__);
+        }
+    }
+    else
+    {
+        retval = -2; // no data available
     }
 
     return retval;
@@ -410,6 +442,11 @@ int BSSocket::setOptions(int level, int optname, const void *optval, int optlen)
         throw new BSException(errno, __FILE__, __LINE__);
     }
     return retval;
+}
+
+int BSSocket::getSockfd()
+{
+    return sockfd;
 }
 
 // private parts

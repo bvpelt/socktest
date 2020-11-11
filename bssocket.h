@@ -98,4 +98,6 @@ public:
 
     int getBacklog();
     void setBacklog(const int backlog);
+
+    int getSockfd();
 };

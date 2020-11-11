@@ -1,4 +1,13 @@
+#ifndef STRING_INCLUDED
 #include <string>
+#define STRING_INCLUDED 1
+#endif
+
+#ifndef PTHEAD_INCLUDED
+#include <pthread.h>
+#define PTHEAD_INCLUDED 1
+#endif
+
 using namespace std;
 
 #define WORK_STARTED 0
@@ -11,6 +20,7 @@ private:
     int connection;
     int status; // 0 started, 1 active, 2 ended
     int retval;
+    pthread_t thread;
 
 public:
     Work();
@@ -25,6 +35,8 @@ public:
     int getRetval();
     void setRetval(const int retval);
     string toString();
+
+    pthread_t *getThreadAdres();
 
     friend ostream &operator<<(ostream &_stream, Work const &w);
 };

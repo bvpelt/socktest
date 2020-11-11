@@ -13,19 +13,53 @@
 #define BS_TCPSERVER_INCLUDED 1
 #endif
 
+#ifndef WORK_INCLUDED
+#include "work.h"
+#define WORK_INCLUDED 1
+#endif
+
+#ifndef LINKEDLIST_INCLUDED
+#include "linkedlist.h"
+#define LINKEDLIST_INCLUDED 1
+#endif
+
 using namespace std;
+
+struct parameterType
+{
+    bool *goOn;
+    LinkedList<Work> *linkedList;
+    int threadid;
+    pthread_mutex_t *output_mutex;
+};
 
 TCPServer::TCPServer()
 {
 }
 
-TCPServer::TCPServer(const string portNumber)
+TCPServer::TCPServer(bool *goOn)
+{
+    this->goOn = goOn;
+}
+
+TCPServer::TCPServer(const string portNumber, bool *goOn)
 {
     this->port = portNumber;
+    this->goOn = goOn;
 }
 
 TCPServer::~TCPServer()
 {
+}
+
+void TCPServer::setGoOn(bool *goOn)
+{
+    this->goOn = goOn;
+}
+
+bool *TCPServer::getGoOn()
+{
+    return this->goOn;
 }
 
 int TCPServer::startUp()
@@ -64,29 +98,47 @@ int TCPServer::startUp()
             retval = bssocket.listensock();
         }
 
-        //
-        // initialize worklist, this is a list with connections and state (STARTED, ACTIVE, CLOSED)
-        //
-
-        //
-        // manager worker with dynamic pool
-        //
-        // start manager thread to get work from the worklist (with mutex) and start a worker
-        //
-
         if (retval == BS_SUCCESS)
         {
-            int clientConnection = bssocket.acceptsock();
-
-            //
-            // add clientconnection to worklist (with mutex)
-            //
-            if (socketHandler != NULL)
+            while (*goOn == true)
             {
-                BSSocket *socket = new BSSocket(clientConnection);
-                socket->setBacklog(bssocket.getBacklog());
+                int clientConnection = 0;
 
-                retval = socketHandler(socket);
+                // acceptsock use nonblocking io for new connection
+                while (clientConnection <= 0)
+                {
+                    retval = bssocket.acceptsock();
+                    if (retval > 0)
+                    {
+                        clientConnection = retval;
+                    }
+                    else
+                    {
+                        if (retval == -5)
+                        {
+                            *goOn = false;
+                        }
+                    }
+                }
+
+                // create work - client connection
+                Work *work = new Work(clientConnection, WORK_STARTED, 1);
+
+                // fill work in worklist
+                worklist.addData(work);
+
+                parameterType *parameter = new parameterType();
+                parameter->goOn = this->goOn;
+                parameter->linkedList = &this->worklist;
+                parameter->threadid = threadid++;
+
+                //
+                // add clientconnection to worklist (with mutex)
+                //
+                if (socketHandler != NULL)
+                {
+                    retval = pthread_create(work->getThreadAdres(), NULL, socketHandler, parameter);
+                }
             }
         }
     }

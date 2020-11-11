@@ -20,7 +20,7 @@ testworklistobjects = testworklist.o
 ALL: server client testworklist cvsimple mlist mtest
 
 server: $(objects) $(serverobjects)
-	$(CXX) $(DEBUGFLAG) -o server $(objects) $(serverobjects)
+	$(CXX) $(DEBUGFLAG) -pthread -o server $(objects) $(serverobjects)
 
 client: $(objects) $(clientobjects)
 	$(CXX) $(DEBUGFLAG) -o client $(objects) $(clientobjects)	
@@ -38,7 +38,7 @@ bsexception.o: bsexception.cpp bsexception.h
 	$(CXX) -c $(CXXFLAGS) $<
 
 tcpserver.o: tcpserver.cpp tcpserver.h bssocket.h
-	$(CXX) -c $(CXXFLAGS) $<
+	$(CXX) -c $(CXXFLAGS) -pthread $<
 
 tcpclient.o: tcpclient.cpp tcpclient.h bssocket.h
 	$(CXX) -c $(CXXFLAGS) $<

@@ -8,7 +8,19 @@
 #define BS_TCPSERVER_INCLUDED 1
 #endif
 
+#include <signal.h>
+#include <sys/time.h>
+
 using namespace std;
+
+static const int success = 0;
+static const int error = -1;
+bool goOn = true;
+
+void my_function(int sig)
+{                 // can be called asynchronously
+    goOn = false; // set flag
+}
 
 int usage(const char *name)
 {
@@ -21,8 +33,28 @@ int usage(const char *name)
     return BS_SUCCESS;
 }
 
-int socketHandler(BSSocket *socket)
+struct parameterType
 {
+    bool *goOn;
+    LinkedList<Work> *linkedList;
+    int threadid;
+    pthread_mutex_t *output_mutex;
+};
+
+//int socketHandler(BSSocket *socket)
+void *socketHandler(void *arg)
+{
+    parameterType *parameter = (parameterType *)arg;
+    bool *goOn = parameter->goOn;
+    LinkedList<Work> *linkedlist = parameter->linkedList;
+    int threadid = parameter->threadid;
+
+    Work *work = linkedlist->getData();
+    int clientConnection = work->getConnection();
+
+    BSSocket *socket = new BSSocket(clientConnection);
+    socket->setBacklog(8);
+
     int retval = BS_SUCCESS;
     try
     {
@@ -46,15 +78,18 @@ int socketHandler(BSSocket *socket)
         retval = BS_ERROR;
     }
 
-    return retval;
+    return ((void *)&success);
 }
 //
 // usage
-// ./server -p <port> -u
+// ./server -p <port> -d -4 -6 -u
 //
 int main(int argc, char *argv[], char *envp[])
 {
-    TCPServer server;
+    // Register signals
+    signal(SIGINT, my_function);
+
+    TCPServer server = TCPServer(&goOn);
 
     int retval = BS_SUCCESS;
     int version = 4;
