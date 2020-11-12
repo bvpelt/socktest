@@ -77,6 +77,7 @@ public:
     BSSocket(const int clientConnection);
     ~BSSocket();
     int createsock();
+    int closesock();
     int bindsock();
     int listensock();
     int acceptsock();

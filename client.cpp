@@ -103,6 +103,7 @@ int main(int argc, char *argv[], char *envp[])
                 goOn = (inputString.substr(0, 4) != "STOP");
             }
         }
+        cout << "Normal exit" << endl;
     }
     catch (BSException ex)
     {

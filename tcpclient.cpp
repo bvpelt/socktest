@@ -27,6 +27,7 @@ TCPClient::TCPClient(const string hostname, const string portNumber)
 
 TCPClient::~TCPClient()
 {
+    bssocket.closesock();
 }
 
 int TCPClient::startUp()
@@ -40,6 +41,7 @@ int TCPClient::startUp()
     }
     catch (BSException ex)
     {
+        bssocket.closesock();
         cerr << "Exception occured " << ex.what() << endl;
     }
     return retval;
@@ -64,14 +66,17 @@ int TCPClient::write(const void *buffer, int len, int flags)
     }
     catch (BSException ex)
     {
+        bssocket.closesock();
         cerr << "Exception occured " << ex.what() << endl;
     }
     catch (exception ex)
     {
+        bssocket.closesock();
         cerr << "Exception occured " << ex.what() << endl;
     }
     catch (...)
     {
+        bssocket.closesock();
         cerr << "Unknown exception" << endl;
     }
     return retval;
@@ -109,6 +114,7 @@ void TCPClient::setPort(const string port)
 
     if (!valid)
     {
+        bssocket.closesock();
         throw BSException("Invalid number: " + port, __FILE__, __LINE__);
     }
 
@@ -129,6 +135,7 @@ void TCPClient::setVersion(const int version)
     }
     else
     {
+        bssocket.closesock();
         throw BSException("Invalid inet version only 4 or 6 allowed", __FILE__, __LINE__);
     }
 }

@@ -20,6 +20,46 @@ bool goOn = true;
 void my_function(int sig)
 {                 // can be called asynchronously
     goOn = false; // set flag
+    cout << "Received ";
+    switch (sig)
+    {
+    case        // Register signals
+        SIGINT: // ctrl c interrupt
+        cout << "SIGINT";
+        break;
+    case SIGHUP:
+        cout << "SIGINT";
+        break;
+    case SIGQUIT: // ctrl \ quit
+        cout << "SIGINT";
+        break;
+    case SIGABRT:
+        cout << "SIGINT";
+        break;
+    case SIGKILL:
+        cout << "SIGINT";
+        break;
+    case SIGPIPE:
+        cout << "SIGINT";
+        break;
+    case SIGTERM:
+        cout << "SIGINT";
+        break;
+    case SIGSTOP:
+        cout << "SIGINT";
+        break;
+    case SIGTSTP: // ctrl z suspend
+        cout << "SIGINT";
+        break;
+    default:
+        cout << sig;
+        break;
+    }
+
+    cout << " recieved - shutting down, wait 5 seconds" << endl;
+    sleep(5); // give threads change to stop
+
+    exit(sig);
 }
 
 int usage(const char *name)
@@ -58,17 +98,27 @@ void *socketHandler(void *arg)
     int retval = BS_SUCCESS;
     try
     {
-        int bytesRead = 1;
+        int bytesRead = 0;
 
-        while (bytesRead > 0)
+        while (*goOn)
         {
-            bytesRead = socket->readit();
-
-            string clientmsg = socket->getBuffer();
-            cout << "Received: " << clientmsg << endl;
-            if (clientmsg == "STOP")
+            while (*goOn && ((bytesRead == -2) || (bytesRead == 0)))
             {
-                bytesRead = -2;
+                bytesRead = socket->readit();
+            }
+
+            if (bytesRead > 0)
+            {
+                string clientmsg = socket->getBuffer();
+                cout << "Received: " << clientmsg << endl;
+                if (clientmsg == "STOP")
+                {
+                    bytesRead = -2;
+                }
+                else
+                {
+                    bytesRead = 0; // handled message
+                }
             }
         }
     }
@@ -87,7 +137,16 @@ void *socketHandler(void *arg)
 int main(int argc, char *argv[], char *envp[])
 {
     // Register signals
-    signal(SIGINT, my_function);
+    signal(SIGINT, my_function); // ctrl c interrupt
+    signal(SIGHUP, my_function);
+    signal(SIGQUIT, my_function); // ctrl \ quit
+    signal(SIGABRT, my_function);
+    signal(SIGKILL, my_function);
+    signal(SIGPIPE, my_function);
+    signal(SIGTERM, my_function);
+    signal(SIGSTOP, my_function);
+    // signal(SIGINFO, my_function); // ctrl t info
+    signal(SIGTSTP, my_function); // ctrl z suspend
 
     TCPServer server = TCPServer(&goOn);
 

@@ -65,6 +65,7 @@ bool *TCPServer::getGoOn()
 int TCPServer::startUp()
 {
     int retval = BS_SUCCESS;
+    bool dowork = true;
 
     try
     {
@@ -74,10 +75,12 @@ int TCPServer::startUp()
         {
             retval = bssocket.getAddrInfo(port.c_str(), AF_INET, AI_PASSIVE); // AI_PASSIVE gives structure for server
         }
+
         if (ipver == 6)
         {
             retval = bssocket.getAddrInfo(port.c_str(), AF_INET6, AI_PASSIVE); // AI_PASSIVE gives structure for server
         }
+
         if (BS_SUCCESS == retval)
         {
             bssocket.getAddrInfo();
@@ -85,20 +88,44 @@ int TCPServer::startUp()
 
         if (BS_SUCCESS == retval)
         {
-            retval = bssocket.createsock();
+            retval = bssocket.createsock(); // returns socket fd > 0
+        }
+        else
+        {
+            dowork = false;
         }
 
-        if (retval > BS_SUCCESS)
+        if (dowork && (retval > BS_SUCCESS))
+        {
+            int enable = 1;
+
+            retval = bssocket.setOptions(SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
+            retval = bssocket.setOptions(SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(enable));
+        }
+        else
+        {
+            dowork = false;
+        }
+
+        if (dowork && (retval == BS_SUCCESS))
         {
             retval = bssocket.bindsock();
         }
+        else
+        {
+            dowork = false;
+        }
 
-        if (retval == BS_SUCCESS)
+        if (dowork && (retval == BS_SUCCESS))
         {
             retval = bssocket.listensock();
         }
+        else
+        {
+            dowork = false;
+        }
 
-        if (retval == BS_SUCCESS)
+        if (dowork && (retval == BS_SUCCESS))
         {
             while (*goOn == true)
             {
@@ -144,6 +171,7 @@ int TCPServer::startUp()
     }
     catch (BSException ex)
     {
+        bssocket.closesock();
         cerr << "Exception occured " << ex.what() << endl;
     }
     return retval;
@@ -173,6 +201,7 @@ void TCPServer::setPort(const string port)
 
     if (!valid)
     {
+        bssocket.closesock();
         throw BSException("Invalid number: " + port, __FILE__, __LINE__);
     }
     this->port = port;
@@ -191,6 +220,7 @@ void TCPServer::setIPVersion(const int version)
     }
     else
     {
+        bssocket.closesock();
         throw BSException("Unsupported version only 4 or 6 allowed", __FILE__, __LINE__);
     }
 }
@@ -204,6 +234,7 @@ void TCPServer::setSocketHandler(const SocketHandlerType handler)
 {
     this->socketHandler = handler;
 }
+
 SocketHandlerType *TCPServer::getSocketHandler()
 {
     return this->socketHandler;

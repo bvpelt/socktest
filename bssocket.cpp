@@ -40,7 +40,14 @@ BSSocket::BSSocket(const int clientConnection)
 //
 BSSocket::~BSSocket()
 {
+    int retval = closesock();
+}
+
+int BSSocket::closesock()
+{
     int retval = 0;
+    dbgMsg("destroy BSSocket");
+
     if (sockfd > 0)
     {
         retval = close(sockfd);
@@ -49,6 +56,7 @@ BSSocket::~BSSocket()
             sockfd = 0;
         }
     }
+    return retval;
 }
 
 string BSSocket::getInet4Adres()
@@ -236,10 +244,12 @@ int BSSocket::connectsock(const char *host, const char *port, const int version)
         {
             adresinfo.ai_family = AF_INET;
         }
+
         if (version == 6)
         {
             adresinfo.ai_family = AF_INET6;
         }
+
         adresinfo.ai_socktype = SOCK_STREAM;
         adresinfo.ai_flags = AI_PASSIVE;
 
@@ -296,16 +306,46 @@ int BSSocket::readit()
 int BSSocket::readsock(const int clientConnection)
 {
     int valread = 0;
+    int retval;
 
     dbgMsg("read");
-    valread = read(clientConnection, buffer, sizeof(buffer));
-    if (BS_ERROR == valread)
+
+    fd_set rfds;
+    struct timeval tv;
+    FD_ZERO(&rfds);
+    FD_SET(clientConnection, &rfds);
+
+    /* Wait up to one seconds. */
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+
+    retval = select(clientConnection + 1, &rfds, NULL, NULL, &tv);
+
+    if (retval == -1)
     {
-        throw new BSException(errno, __FILE__, __LINE__);
+        perror("read()");
+        if (errno == EINTR) // interrupted
+        {
+            retval = -5;
+        }
+    }
+    else if (retval) // data available
+    {
+        valread = read(clientConnection, buffer, sizeof(buffer));
+
+        if (BS_ERROR == valread)
+        {
+            closesock();
+            throw new BSException(errno, __FILE__, __LINE__);
+        }
+        else
+        {
+            buffer[valread + 1] = '\0';
+        }
     }
     else
     {
-        buffer[valread + 1] = '\0';
+        retval = -2; // no data available
     }
     return valread;
 }
